@@ -1,5 +1,10 @@
 package com.zkem.bw;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.jacob.activeX.ActiveXComponent;
 import com.jacob.com.Variant;
 
@@ -26,7 +31,7 @@ public class ZkemSDK {
 	 * @param inMachineNumber 机器号(输入参数)
 	 * @return 连接成功返回true,连接失败返回false
 	 */
-	public static boolean Connect_USB(int inMachineNumber){
+	public boolean Connect_USB(int inMachineNumber){
 		boolean status= zkem.invoke("Connect_USB",new Variant(inMachineNumber)).getBoolean();
 		return status;
 	}
@@ -34,7 +39,7 @@ public class ZkemSDK {
 	/**
 	 * 断开连接
 	 */
-	public static void Disconnect(){
+	public void Disconnect(){
 		zkem.invoke("Disconnect");
 	}
 	
@@ -44,8 +49,72 @@ public class ZkemSDK {
 	 * @param inMachineNumber 机器号(输入参数)
 	 * @return 读取成功返回true，读取失败返回false
 	 */
-	public static boolean ReadAllUserID(int inMachineNumber){
+	public boolean ReadAllUserID(int inMachineNumber){
 		boolean status=zkem.invoke("ReadAllUserID",new Variant(inMachineNumber)).getBoolean();
 		return status;
+	}
+	
+	public List<Map<String,Object>> GetAllUserInfo(int inMachineNumber){
+		List<Map<String,Object>> listUser=new ArrayList<Map<String,Object>>();
+		
+		boolean status=this.ReadAllUserID(inMachineNumber);
+		
+		if(status==false){
+			return null;
+		}
+		
+		Variant machineNumber=new Variant(1,true);
+		Variant enrollNumber=new Variant("",true);
+		Variant name=new Variant("",true);
+		Variant password=new Variant("",true);
+		Variant privilege=new Variant(0,true);
+		Variant enable=new Variant(false,true);
+		
+		while(status){
+			status=zkem.invoke(
+					"GetAllUserInfo",
+					machineNumber,
+					enrollNumber,
+					name,
+					password,
+					privilege,
+					enable).getBoolean();
+			
+			//如果没有用户编号则跳过
+			String strEnrollnumber=enrollNumber.getStringRef();
+			if(strEnrollnumber==null || strEnrollnumber.trim().length()==0)
+				continue;
+			
+			//名字乱码处理
+			int nameBytelength=name.getStringRef().getBytes().length;
+			String strName="";
+			
+			if(nameBytelength == 9 || nameBytelength == 8)
+			{
+				strName = name.getStringRef().substring(0,3);
+			}else if(nameBytelength == 7 || nameBytelength == 6)
+			{
+				strName = name.getStringRef().substring(0,2);
+			}else if(nameBytelength == 11 || nameBytelength == 10)
+			{
+				strName = name.getStringRef().substring(0,4);
+			}
+			
+			//如果没有名字则跳过
+			if(strName.trim().length()==0 || strName==null)
+				continue;
+			
+			Map<String,Object> userMap=new HashMap<String,Object>();
+			userMap.put("machinenumber", machineNumber.getIntRef());
+			userMap.put("enrollnumber", strEnrollnumber);
+			userMap.put("name", strName);
+			userMap.put("password", password.getStringRef());
+			userMap.put("privilege", privilege.getIntRef());
+			userMap.put("enable", enable.getBooleanRef());
+			
+			listUser.add(userMap);
+		}
+		
+		return listUser;
 	}
 }
