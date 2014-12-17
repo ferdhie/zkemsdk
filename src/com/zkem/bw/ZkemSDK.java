@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.charset.CharsetUtils;
 import com.jacob.activeX.ActiveXComponent;
 import com.jacob.com.Variant;
 
@@ -20,7 +21,7 @@ public class ZkemSDK {
 	
 	static{
 		try{
-			zkem=new ActiveXComponent("zkemkeeper.ZKEM");
+			zkem=new ActiveXComponent("zkemkeeper.ZKEM.1");
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -72,7 +73,7 @@ public class ZkemSDK {
 		
 		while(status){
 			status=zkem.invoke(
-					"GetAllUserInfo",
+					"SSR_GetAllUserInfo",
 					machineNumber,
 					enrollNumber,
 					name,
@@ -86,27 +87,30 @@ public class ZkemSDK {
 				continue;
 			
 			//名字乱码处理
-			int nameBytelength=name.getStringRef().getBytes().length;
-			String strName="";
+			String strName=null;
 			
-			if(nameBytelength == 9 || nameBytelength == 8)
+			
+			if(name.getStringRef().getBytes().length == 9 || name.getStringRef().getBytes().length == 8)
 			{
-				strName = name.getStringRef().substring(0,3);
-			}else if(nameBytelength == 7 || nameBytelength == 6)
+				strName = CharsetUtils.Convert(name.getStringRef(), "UTF-8").substring(0,3);
+			}else if(name.getStringRef().getBytes().length == 7 || name.getStringRef().getBytes().length == 6)
 			{
-				strName = name.getStringRef().substring(0,2);
-			}else if(nameBytelength == 11 || nameBytelength == 10)
+				strName = CharsetUtils.Convert(name.getStringRef(), "UTF-8").substring(0,2);
+			}else if(name.getStringRef().getBytes().length == 11 || name.getStringRef().getBytes().length == 10)
 			{
-				strName = name.getStringRef().substring(0,4);
+				strName = CharsetUtils.Convert(name.getStringRef(), "UTF-8").substring(0,4);
 			}
 			
+			
+//			strName=CharsetUtils.Convert(name.getStringRef(), "UTF-8");
+			
 			//如果没有名字则跳过
-			if(strName.trim().length()==0 || strName==null)
+			if(strName==null || strName.trim().length()==0)
 				continue;
 			
 			Map<String,Object> userMap=new HashMap<String,Object>();
 			userMap.put("machinenumber", machineNumber.getIntRef());
-			userMap.put("enrollnumber", strEnrollnumber);
+			userMap.put("enrollnumber", enrollNumber.getStringRef());
 			userMap.put("name", strName);
 			userMap.put("password", password.getStringRef());
 			userMap.put("privilege", privilege.getIntRef());
