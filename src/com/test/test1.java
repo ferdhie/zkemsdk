@@ -18,7 +18,7 @@ public class test1 {
 			System.out.println("连接USB失败");
 		}else{
 			System.out.println("连接成功!");
-			List<Map<String,Object>> listUser=zkemsdk.GetAllUserInfo(machineNumber);
+			List<Map<String,Object>> listUser=zkemsdk.SSR_GetAllUserInfo(machineNumber);
 			
 			if(listUser!=null){
 				for(Map<String,Object> user:listUser){
