@@ -1378,4 +1378,429 @@ public class ZkemSDK {
 	public boolean RefreshData(int machineNumber){
 		return zkem.invoke("RefreshData",new Variant(machineNumber)).getBoolean();
 	}
+	
+	
+	
+	/*******************5.4机器管理相关*********************/
+	
+	
+	/**
+	 * 判断当前机器是否为彩屏机
+	 * 
+	 * @param machineNumber 机器号
+	 * @return 是彩屏机返回true，不是彩屏机返回false
+	 */
+	public boolean isTFTMachine(int machineNumber){
+		return zkem.invoke("isTFTMachine",new Variant(machineNumber)).getBoolean();
+	}
+	
+	
+	/**
+	 * 获取机器内数据存储状态，例如管理员数，当前用户数等
+	 * 函数原型:VARIANT_BOOL GetDeviceStatus([in]long dwMacineNumber,[in]long dwInfo,[out]long* dwValue)
+	 * 
+	 * @param machineNumber 机器号
+	 * @param status 需获取的数据，范围1-22，含义如下：1管理员数量，2注册用户数量，3机器内指纹模板数量，4密码数量，5操作记录数
+	 * 					6考勤记录数，7指纹模板容量，8用户容量，9考勤记录容量，10剩余指纹容量，11剩余用户容量，12剩余考勤记录容量
+	 * 					21人脸总数，22人脸容量，其他状态状况返回0
+	 * @return 返回值与status取值对应
+	 */
+	public Integer GetDeviceStatus(int machineNumber,int status){
+		Variant value=new Variant(0,true);
+		boolean status_b=zkem.invoke("GetDeviceStatus",
+				new Variant(machineNumber),new Variant(status),value).getBoolean();
+		
+		if(status_b==false){
+			return null;
+		}
+		
+		return value.getIntRef();
+	}
+	
+	
+	/**
+	 * 获取机器相关信息，例如语言，波特率等
+	 * 函数原型:VARIANT_BOOL GetDeviceInfo([in]long dwMachineNumber,[in]long dwInfo,[out]long* Value)
+	 * 
+	 * @param machineNumber 机器号
+	 * @param info 需获取的信息类型，范围为1-68(注：不能为65)，具体含义如下
+		1最大管理员数，总是返回500，2机器号，3语言：(0后缀为E一般代表英文，1其他状况，2语言后缀为T代表繁体，3语言后缀为L代表泰语)
+		4空闲时长(分钟)即空闲该时段后机器进入待机或关机，5锁控时长，即锁驱动时长，6考勤记录报警数，当考勤记录数量到达该数量时，机器会报警提示
+		7操作记录报警数，即当操作记录达到该数量时，机器会报警以提示用户，8重复记录时间，即同一用户打同一考勤状态的最小时间间隔
+		9：232/485通讯波特率，0:1200bps,1:2400,2:4800,3:9600,4:19200,5:38400,6:57600,其他 :115200
+		10奇偶校验，总是返回0，11停止位，总是返回0。。。。具体参数请查看脱机开发文档。。。。
+	 * 				
+	 * @return 具体返回值与info值设置有关
+	 */
+	public Integer GetDeviceInfo(int machineNumber,int info){
+		Variant value=new Variant(0,true);
+		boolean status=zkem.invoke("GetDeviceInfo",
+				new Variant(machineNumber),new Variant(info),value).getBoolean();
+		
+		if(status==false){
+			return null;
+		}
+		
+		return value.getIntRef();
+				
+	}
+	
+	
+	/**
+	 * 设置机器相关信息，例如语言，重复记录时间等
+	 * 
+	 * @param machineNumber 机器号
+	 * @param info 欲设置的信息类型，范围为1-20，其含义参考GetDeviceInfo函数该参数含义
+	 * @param value 要设置的值，请参考info含义
+	 * @return 设置成功返回true，设置失败返回false
+	 */
+	public boolean SetDeviceInfo(int machineNumber,int info,int value){
+		return zkem.invoke("SetDeviceInfo",
+				new Variant(machineNumber),new Variant(info),new Variant(value)).getBoolean();
+	}
+	
+	
+	/**
+	 * 将本地电脑的时间设置为机器时间，如需要设置指定时间，可参考SetDeviceTime2
+	 * 
+	 * @param machineNumber 机器号
+	 * @return 设置成功返回true，设置失败返回false
+	 */
+	public boolean SetDeviceTime(int machineNumber){
+		return zkem.invoke("SetDeviceTime",new Variant(machineNumber)).getBoolean();
+	}
+	
+	
+	/**
+	 * 设置机器时间(可指定时间)
+	 * 
+	 * @param machineNumber 机器号
+	 * @param year 年
+	 * @param month 月
+	 * @param day 日
+	 * @param hour 时
+	 * @param minute 分
+	 * @param second 秒
+	 * @return 设置成功返回true，设置失败返回false
+	 */
+	public boolean SetDeviceTime2(int machineNumber,int year,int month,int day,int hour,int minute,int second){
+		return zkem.invoke("SetDeviceTime2",
+				new Variant(machineNumber),
+				new Variant(year),
+				new Variant(month),
+				new Variant(day),
+				new Variant(hour),
+				new Variant(minute),
+				new Variant(second)).getBoolean();
+	}
+	
+	
+	/**
+	 * 获取设备时间
+	 * 
+	 * @param machineNumber 机器号
+	 * @return Map<String,Object>的时间信息
+	 */
+	public Map<String,Object> GetDeviceTime(int machineNumber){
+		Variant year =new Variant(0,true);
+		Variant month =new Variant(0,true);
+		Variant day =new Variant(0,true);
+		Variant hour =new Variant(0,true);
+		Variant minute =new Variant(0,true);
+		Variant second =new Variant(0,true);
+		
+		boolean status=zkem.invoke("GetDeviceTime",new Variant(machineNumber),
+				year,month,day,hour,minute,second).getBoolean();
+		
+		if(status==false){
+			return null;
+		}
+		
+		Map<String,Object> deviceTime=new HashMap<String,Object>();
+		deviceTime.put("year", year.getIntRef());
+		deviceTime.put("month", month.getIntRef());
+		deviceTime.put("day", day.getIntRef());
+		deviceTime.put("hour", hour.getIntRef());
+		deviceTime.put("minute", minute.getIntRef());
+		deviceTime.put("second", second.getIntRef());
+		
+		return deviceTime;	
+	}
+	
+	
+	/**
+	 * 获取机器序列号
+	 * 
+	 * @param machineNumber 机器号
+	 * @return 序列号
+	 */
+	public String GetSerialNumber(int machineNumber){
+		Variant serialNumber=new Variant("",true);
+		boolean status=zkem.invoke("GetSerialNumber",new Variant(machineNumber),serialNumber).getBoolean();
+		
+		if(status==false){
+			return null;
+		}
+		
+		return serialNumber.getStringRef();
+	}
+	
+	
+	/**
+	 * 获取机器名称
+	 * @param machineNumber 机器号
+	 * @return 机器号
+	 */
+	public String GetProductCode(int machineNumber){
+		Variant productCode=new Variant("",true);
+		boolean status=zkem.invoke("GetProductCode",new Variant(machineNumber),productCode).getBoolean();
+		
+		if(status==false){
+			return null;
+		}
+		
+		return productCode.getStringRef();
+	}
+	
+	
+	/**
+	 * 获取机器固件版本
+	 * @param machineNumber 机器号
+	 * @return 固件版本
+	 */
+	public String GetFirmwareVersion(int machineNumber){
+		Variant version=new Variant("",true);
+		boolean status=zkem.invoke("GetFirmwareVersion",new Variant(machineNumber),version).getBoolean();
+		
+		if(status==false){
+			return null;
+		}
+		
+		return version.getStringRef();
+	}
+	
+	
+	/**
+	 * 获取SDK版本号
+	 * @return SDK版本号
+	 */
+	public String GetSDKVersion(){
+		Variant version=new Variant("",true);
+		boolean status=zkem.invoke("GetSDKVersion",version).getBoolean();
+		
+		if(status==false){
+			return null;
+		}
+		return version.getStringRef();
+	}
+	
+	
+	/**
+	 * 获取机器IP号
+	 * @param machineNumber 机器号
+	 * @return IP地址
+	 */
+	public String GetDeviceIP(int machineNumber){
+		Variant ipAddr=new Variant("",true);
+		boolean status=zkem.invoke("GetDeviceIP",new Variant(machineNumber),ipAddr).getBoolean();
+		
+		if(status==false){
+			return null;
+		}
+		
+		return ipAddr.getStringRef();
+	}
+	
+	
+	/**
+	 * 设置机器IP地址
+	 * @param machineNumber 机器编号
+	 * @param ipAddr ip地址
+	 * @return 设置成功返回true，设置失败返回false
+	 */
+	public boolean SetDeviceIP(int machineNumber,String ipAddr){
+		return zkem.invoke("SetDeviceIP",new Variant(machineNumber),new Variant(ipAddr)).getBoolean();
+	}
+	
+	
+	/**
+	 * 获取机器的MAC地址
+	 * @param machineNumber 机器号
+	 * @return MAC地址
+	 */
+	public String GetDeviceMAC(int machineNumber){
+		Variant mac=new Variant("",true);
+		boolean status=zkem.invoke("GetDeviceMAC",new Variant(machineNumber),mac).getBoolean();
+		
+		if(status==false){
+			return null;
+		}
+		
+		return mac.getStringRef();
+	}
+	
+	
+	/**
+	 * 设置机器MAC地址
+	 * @param machineNumber 机器编号
+	 * @param macAddr MAC地址
+	 * @return 设置成功返回true，设置失败返回false
+	 */
+	public boolean SetDeviceMAC(int machineNumber,String macAddr){
+		return zkem.invoke("SetDeviceMAC",new Variant(machineNumber),new Variant(macAddr)).getBoolean();
+	}
+	
+	
+	/**
+	 * 获取机器是否支持射频卡功能
+	 * 
+	 * @param machineNumber 机器号
+	 * @return 返回值1：仅支持射频卡，2：支持射频卡也支持指纹，0：不支持射频卡
+	 */
+	public Integer GetCardFun(int machineNumber){
+		Variant cardFun=new Variant(0,true);
+		boolean status=zkem.invoke("GetCardFun",new Variant(machineNumber),cardFun).getBoolean();
+		
+		if(status==false){
+			return null;
+		}
+		
+		return cardFun.getIntRef();
+	}
+	
+	
+	/**
+	 * 设置机器通讯密码，该函数设置机器通讯密码，该通讯密码会保存在机器内
+	 * 
+	 * @param machineNumber 机器号
+	 * @param commoKey 通讯密码
+	 * @return 设置成功返回true，设置失败返回false
+	 */
+	public boolean SetDeviceCommPwd(int machineNumber,int commKey){
+		return zkem.invoke("SetDeviceCommPwd",new Variant(machineNumber),new Variant(commKey)).getBoolean();
+	}
+	
+	
+	/**
+	 * 设置PC端通讯密码，只有当PC端通讯密码和机器通讯密码相同才可以建立连接
+	 * 
+	 * @param commKey 通讯密码
+	 * @return 设置成功返回true，设置失败返回false
+	 */
+	public boolean SetCommPassword(int commKey){
+		return zkem.invoke("SetCommPassword",new Variant(commKey)).getBoolean();
+	}
+	
+	
+	/**
+	 * 查询当前机器状态
+	 * 
+	 * @return 0等待状态，1登记指纹状态，2识别指纹状态，3进入菜单状态，4忙状态(正在处理其他工作),5等待写卡状态
+	 */
+	public Integer QueryState(){
+		Variant state=new Variant(0,true);
+		boolean status=zkem.invoke("QueryState",state).getBoolean();
+		if(status==false){
+			return null;
+		}
+		
+		return state.getIntRef();
+	}
+	
+	
+	/**
+	 * 获取机器制造商名称
+	 * 
+	 * @return 机器制造商名称
+	 */
+	public String GetVendor(){
+		Variant vendor=new Variant("",true);
+		boolean status=zkem.invoke("GetVendor",vendor).getBoolean();
+		
+		if(status==false){
+			return null;
+		}
+		
+		return vendor.getStringRef();
+	}
+	
+	
+	/**
+	 * 获取机器的出厂时间
+	 * 
+	 * @param machineNumber 机器号
+	 * @return 出厂时间
+	 */
+	public String GetDeviceStrInfo(int machineNumber){
+		Variant info=new Variant(1);
+		Variant value=new Variant("",true);
+		boolean status=zkem.invoke("GetDeviceStrInfo",new Variant(machineNumber),info,value).getBoolean();
+		
+		if(status==false){
+			return null;
+		}
+		
+		return value.getStringRef();
+	}
+	
+	
+	/**
+	 * 获取设备平台的名称
+	 * @param machineNumber 机器号
+	 * @return  设备平台的名称
+	 */
+	public String GetPlatform(int machineNumber){
+		Variant platForm=new Variant("",true);
+		boolean status=zkem.invoke("GetPlatform",new Variant(machineNumber),platForm).getBoolean();
+		
+		if(status==false){
+			return null;
+		}
+		
+		return platForm.getStringRef();
+	}
+	
+	
+	/**
+	 * 获取机器内的参数配置情况，注：可通过该函数获取机器使用的算法版本
+	 * 
+	 * @param machineNumber 机器号
+	 * @param option 参数名称：当该参数为字符串"~ZKFPVersion"时，由value描述的返回值为10，
+	 * 代表当前机器使用的10.0指纹算法，如为空或为9时，代表当前机器使用的算法为9.0
+	 * 
+	 * @return 返回值参考option描述
+	 */
+	public String GetSysOption(int machineNumber,String option){
+		Variant value=new Variant("",true);
+		boolean status=zkem.invoke("GetSysOption",new Variant(machineNumber),new Variant(option),value).getBoolean();
+		
+		if(status==false){
+			return null;
+		}
+		
+		return value.getStringRef();
+	}
+	
+	
+	/**
+	 * 配置机器内的参数
+	 * 
+	 * @param machineNumber 机器号
+	 * @param option 参数名称
+	 * @param value 参数的值
+	 * @return
+	 */
+	public boolean SetSysOption(int machineNumber,String option,String value){
+		return zkem.invoke("SetSysOption",new Variant(machineNumber),
+					new Variant(option),new Variant(value)).getBoolean();
+	}
+	
+	
+	
+	
+	/*****************5.5.1机器控制*********************/
+	
+	
+	
+	
 }
