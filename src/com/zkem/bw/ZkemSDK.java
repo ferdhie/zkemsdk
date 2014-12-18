@@ -1041,6 +1041,9 @@ public class ZkemSDK {
 	}
 	
 	
+	
+	/*********************节假日相关函数************************/
+	
 	/**
 	 * 根据节假日编号获取机器上的节假日设置
 	 * 函数原型:VARIANT_BOOL SSR_GetHoliday([in]LONG dwMachineNumber,[in]LONG HolidayID,
@@ -1053,9 +1056,326 @@ public class ZkemSDK {
 	 * 
 	 * @param machineNumber 机器号
 	 * @param holidayID 节假日编号
-	 * @return 
+	 * @return Map<String,Object>节假日信息
 	 */
-	public boolean SSR_GetHoliday(int machineNumber,int holidayID){
+	public Map<String,Object> SSR_GetHoliday(int machineNumber,int holidayID){
+		Variant beginMonth=new Variant(0,true);
+		Variant beginDay=new Variant(0,true);
+		Variant endMonth=new Variant(0,true);
+		Variant endDay=new Variant(0,true);
 		
+		boolean status=zkem.invoke("SSR_GetHoliday",
+				new Variant(machineNumber),
+				new Variant(holidayID),
+				beginMonth,beginDay,
+				endMonth,endDay).getBoolean();
+		
+		if(status==false){
+			return null;
+		}
+		
+		Map<String,Object> mapHoliday=new HashMap<String,Object>();
+		mapHoliday.put("beginmonth", beginMonth);
+		mapHoliday.put("beginday", beginDay);
+		mapHoliday.put("endmonth", endMonth);
+		mapHoliday.put("endday", endDay);
+		
+		return mapHoliday;
+	}
+	
+	
+	/**
+	 * 设置节假日
+	 * 函数原型:VARIANT_BOOL SSR_SetHoliday([in]LONG dwMachineNumber,[in]LONG HolidayID,
+	 * [in]LONG BeginMonth,[in]LONG BeginDay,[in]LONG EndMonth,[in]LONG EndDay,[in]LONG TimeZoneID)
+	 * 
+	 * 
+	 * @param machineNumber 机器号
+	 * @param holidayID 节假日编号
+	 * @param beginMonth 节假日开始时间(月)
+	 * @param beginDay节假日开始时间(日)
+	 * @param endMonth 节假日结束时间(月)
+	 * @param endDay 节假日结束时间(日)
+	 * @param timeZoneID 节假日使用的时间段编号
+	 * @return 设置成功返回true，设置失败返回false
+	 */
+	public boolean SSR_SetHoliday(int machineNumber,int holidayID,int beginMonth,
+							int beginDay,int endMonth,int endDay,int timeZoneID){
+		return zkem.invoke("SSR_SetHoliday",
+				new Variant(machineNumber),
+				new Variant(holidayID),
+				new Variant(beginMonth),
+				new Variant(beginDay),
+				new Variant(endMonth),
+				new Variant(endDay),
+				new Variant(timeZoneID)).getBoolean();
+	}
+	
+	
+	/*************************夏时令相关函数****************************/
+	
+	
+	/**
+	 * 设置是否使用夏时令功能，以及夏时令开始时间和结束时间
+	 * 函数原型:VARIANT_BOOL SetDaylight([in]LONG dwMachineNumber,[in]LONG Support
+	 * [in]BSTR BeginTime,[in]BSTR EndTime)
+	 * 
+	 * @param machineNumber 机器号
+	 * @param support 是否使用夏时令功能，1为启用，0为禁用
+	 * @param beginTime 夏时令开始时间，日期格式为  mmdd hh:mm
+	 * @param endTime 夏时令结束时间，日期格式为  mmdd hh:mm
+	 * @return 设置成功返回true，设置失败返回false
+	 */
+	public boolean SetDaylight(int machineNumber,int support,String beginTime,String endTime){
+		return zkem.invoke("SetDaylight",
+				new Variant(machineNumber),
+				new Variant(support),
+				new Variant(beginTime),
+				new Variant(endTime)).getBoolean();
+	}
+	
+	
+	/**
+	 * 获取机器的夏时令
+	 * 函数原型:VARIANT_BOOL GetDaylight([in] dwMachineNumber,[out]LONG* Support,
+	 * [out]BSTR* BeginTime,[out]BSTR* EndTime)
+	 * 
+	 * @param machineNumber 机器号
+	 * @return Map<String,Object>的夏时令信息
+	 */
+	public Map<String,Object> GetDaylight(int machineNumber){
+		Variant support=new Variant(0,true);
+		Variant beginTime=new Variant("",true);
+		Variant endTime=new Variant("",true);
+		boolean status=zkem.invoke("GetDaylight",
+						new Variant(machineNumber),
+						support,beginTime,endTime).getBoolean();
+		
+		if(status==false){
+			return null;
+		}
+		
+		Map<String,Object> dayLight=new HashMap<String,Object>();
+		dayLight.put("support", support.getIntRef());
+		dayLight.put("beginTime", beginTime.getStringRef());
+		dayLight.put("endTime", endTime.getStringRef());
+		
+		return dayLight;
+	}
+	
+	
+	
+	
+	/************************指纹模板转换相关函数*************************/
+	
+	
+	/**
+	 * 计算指定指纹模板长度
+	 * 函数原型:VARIANT_BOOL GetFPTempLength([in]BYTE* enrollData,[out]LONG* Len)
+	 * 
+	 * Len:指纹模板的长度
+	 * 
+	 * @param enrollData 指向指纹模板的指针
+	 * @return 成功返回指纹模板长度，失败返回0
+	 */
+	public int GetFPTempLength(byte enrollData){
+		Variant len=new Variant(0,true);
+		boolean status=zkem.invoke("GetFPTempLength",new Variant(enrollData),len).getBoolean();
+		if(status==false){
+			return 0;
+		}
+		
+		return len.getIntRef();
+	}
+	
+	
+	/**
+	 * 计算指定指纹模板长度
+	 * 函数原型:VARIANT_BOOL GetFPTempLength([in]BSTR* enrollData,[out]LONG* Len)
+	 * 
+	 * Len:指纹模板的长度
+	 * 
+	 * @param enrollData 指向指纹模板的指针
+	 * @return 成功返回指纹模板长度，失败返回0
+	 */
+	public int GetFPTempLengthStr(String enrollData){
+		Variant len=new Variant(0,true);
+		boolean status=zkem.invoke("GetFPTempLengthStr",new Variant(enrollData),len).getBoolean();
+		if(status==false){
+			return 0;
+		}
+		
+		return len.getIntRef();
+	}
+	
+	
+	/**
+	 * 脱机指纹模板转换为BIOKEY指纹模板，和FPTempConvertStr的区别在于格式不同而已
+	 * 函数原型:VARIANT_BOOL FPTempConvert([in]BYTE* TmpData1,[out]BYTE* TmpData2,[out]LONG* Size)
+	 * TmpData2:返回转换后的BIOKEY指纹模板
+	 * Size:返回转换后的BIOKEY指纹模板的大小
+	 * 
+	 * @param tmpData1 要转换的脱机指纹模板
+	 * @return 转换成功返回Map<String,Object>的指纹模板信息，转换失败返回null
+	 */
+	public Map<String,Object> FPTempConvert(byte tmpData1){
+		Variant tmpData2=new Variant("",true);
+		Variant size=new Variant(0,true);
+		boolean status=zkem.invoke("FPTempConvert",new Variant(tmpData1),tmpData2,size).getBoolean();
+		
+		if(status==false){
+			return null;
+		}
+		
+		Map<String,Object> fpTemp=new HashMap<String,Object>();
+		fpTemp.put("tmpdata2", tmpData2.getByteRef());
+		fpTemp.put("size", size.getIntRef());
+		
+		return fpTemp;
+	}
+
+	
+	/**
+	 * 脱机指纹模板转换为BIOKEY指纹模板，和FPTempConvertStr的区别在于格式不同而已
+	 * 函数原型:VARIANT_BOOL FPTempConvertStr([in]BSTR* TmpData1,[out]BSTR* TmpData2,[out]LONG* Size)
+	 * TmpData2:返回转换后的BIOKEY指纹模板
+	 * Size:返回转换后的BIOKEY指纹模板的大小
+	 * 
+	 * @param tmpData1 要转换的脱机指纹模板
+	 * @return 转换成功返回Map<String,Object>的指纹模板信息，转换失败返回null
+	 */
+	public Map<String,Object> FPTempConvertStr(String tmpData1){
+		Variant tmpData2=new Variant("",true);
+		Variant size=new Variant(0,true);
+		boolean status=zkem.invoke("FPTempConvertStr",new Variant(tmpData1),tmpData2,size).getBoolean();
+		
+		if(status==false){
+			return null;
+		}
+		
+		Map<String,Object> fpTemp=new HashMap<String,Object>();
+		fpTemp.put("tmpdata2", tmpData2.getByteRef());
+		fpTemp.put("size", size.getIntRef());
+		
+		return fpTemp;
+	}
+	
+	
+	/**
+	 * 将BIOKEY指纹模板转换为脱机指纹模板，和FPTempConvertNewStr的区别在与数据格式不同而已
+	 * 函数原型:VARIANT_BOOL FPTempConvertNew([in]BYTE* TmpData1,[out]BYTE* TmpData2,[out]LONG* Size)
+	 * TmpData2:返回转换后的脱机指纹模板
+	 * Size:脱机指纹模板的大小
+	 * 
+	 * @param tmpData1 要转换的脱机指纹模板
+	 * @return Map<String,Object>的指纹模板数据
+	 */
+	public Map<String,Object> FPTempConvertNew(byte tmpData1){
+		Variant tmpData2=new Variant("",true);
+		Variant size=new Variant(0,true);
+		boolean status=zkem.invoke("FPTempConvertNew",new Variant(tmpData1),tmpData2,size).getBoolean();
+		
+		if(status==false){
+			return null;
+		}
+		
+		Map<String,Object> fpTemp=new HashMap<String,Object>();
+		fpTemp.put("tmpData2", tmpData2.getByteRef());
+		fpTemp.put("size", size.getIntRef());
+		
+		return fpTemp;
+	}
+
+	
+	/**
+	 * 将BIOKEY指纹模板转换为脱机指纹模板
+	 * 函数原型:VARIANT_BOOL FPTempConvertNewStr([in]BSTR* TmpData1,[out]BSTR* TmpData2,[out]LONG* Size)
+	 * TmpData2:返回转换后的脱机指纹模板
+	 * Size:脱机指纹模板的大小
+	 * 
+	 * @param tmpData1 要转换的脱机指纹模板
+	 * @return Map<String,Object>的指纹模板数据
+	 */
+	public Map<String,Object> FPTempConvertNewStr(String tmpData1){
+		Variant tmpData2=new Variant("",true);
+		Variant size=new Variant(0,true);
+		boolean status=zkem.invoke("FPTempConvertNew",new Variant(tmpData1),tmpData2,size).getBoolean();
+		
+		if(status==false){
+			return null;
+		}
+		
+		Map<String,Object> fpTemp=new HashMap<String,Object>();
+		fpTemp.put("tmpData2", tmpData2.getStringRef());
+		fpTemp.put("size", size.getIntRef());
+		
+		return fpTemp;
+	}
+	
+	
+	
+	/***********************系统数据管理相关函数****************************/
+	
+	
+	/**
+	 * 清除机器内所有的数据
+	 * @param machineNumber 机器号
+	 * @return 清除成功返回true，清除失败返回false
+	 */
+	public boolean ClearKeeperData(int machineNumber){
+		return zkem.invoke("ClearKeeperData",new Variant(machineNumber)).getBoolean();
+	}
+	
+	
+	/**
+	 * 清除机器内由DataFlag指定的记录
+	 * 
+	 * @param machineNumber 机器号
+	 * @param dataFlag 该参数指定需清除的记录类型，范围为1-5，具体含义如下：1考勤记录，2指纹模板数据，3无，4操作记录，5用户信息及指纹模板
+	 * @return 清除成功返回true，清除失败返回false
+	 */
+	public boolean ClearData(int machineNumber,int dataFlag){
+		return zkem.invoke("ClearData",new Variant(machineNumber),new Variant(dataFlag)).getBoolean();
+	}
+	
+	
+	/**
+	 * 从机器获取指定数据文件
+	 * 
+	 * @param machineNumber 机器号
+	 * @param dataFlag 需要获取的数据文件类型：1考勤记录数据文件，2指纹模板数据文件，3无，4操作记录数据文件，5用户信息数据文件，6短消息数据文件
+						7短消息与用户关系的数据文件，8扩展用户信息数据文件，9Workcode信息数据文件
+	 * @param fileName 接收获取到的数据文件存储文件名
+	 * @return 获取成功返回true，获取失败返回false
+	 */
+	public boolean GetDataFile(int machineNumber,int dataFlag,String fileName){
+		return zkem.invoke("GetDataFile",new Variant(machineNumber),
+					new Variant(dataFlag),new Variant(fileName)).getBoolean();
+	}
+	
+	
+	/**
+	 * 发送文件到机器，一般发送到/mnt/mtdblock/下，彩屏机如传的是用户照片或者宣传图片，
+	 * 需命名为以下格式：图片会自动被转移到相应的目录下
+	 * 宣传图片命名方式："ad_"为前缀，后加数字，范围为1-20，后缀为.jpg,如ad_4.jpg
+	 * 用户照片的命名方式:"用户ID"+".jpg"，如1.jpg
+	 * 
+	 * @param machineNumber 机器号
+	 * @param fileName 要发送的文件名
+	 * @return 发送成功返回true，发送失败返回false
+	 */
+	public boolean SendFile(int machineNumber,String fileName){
+		return zkem.invoke("SendFile",new Variant(machineNumber),new Variant(fileName)).getBoolean();
+	}
+	
+	
+	/**
+	 * 刷新机器内数据，一般在上传用户信息或者指纹之后调用，这样能使所做的修改立即起作用，起到同步作用
+	 * 
+	 * @param machineNumber 机器号
+	 * @return 刷新成功返回true，刷新失败返回false
+	 */
+	public boolean RefreshData(int machineNumber){
+		return zkem.invoke("RefreshData",new Variant(machineNumber)).getBoolean();
 	}
 }
