@@ -1801,6 +1801,75 @@ public class ZkemSDK {
 	/*****************5.5.1机器控制*********************/
 	
 	
+	/**
+	 * 清除机器内所有管理员权限
+	 * @param machineNumber 机器号
+	 * @return 清除成功返回true，清除失败返回false
+	 */
+	public boolean ClearAdministrators(int machineNumber){
+		return zkem.invoke("ClearAdministrators",new Variant(machineNumber)).getBoolean();
+	}
+	
+	
+	/**
+	 * 设置启用或禁用机器，禁用意味着关闭指纹头，键盘，卡模块等
+	 * 
+	 * @param machineNumber 机器号
+	 * @param flag 1为启用，0为禁用
+	 * @return 设置成功返回true，设置失败返回false
+	 */
+	public boolean EnableDevice(int machineNumber,int flag){
+		return zkem.invoke("EnableDevice",new Variant(machineNumber),new Variant(flag)).getBoolean();
+	}
+	
+	
+	/**
+	 * 启用或禁用机器时钟的":"显示，启用机器显示并刷新到主界面，禁用时不显示":"
+	 * 
+	 * @param enable 1为启用，0为禁用
+	 * @return 设置成功返回true，设置失败返回false
+	 */
+	public boolean EnableClock(int enable){
+		return zkem.invoke("EnableClock",new Variant(enable)).getBoolean();
+	}
+	
+	
+	/**
+	 * 禁用机器一段时间
+	 * 
+	 * @param machineNumber 机器号
+	 * @param second 禁用时间
+	 * @return 设置成功返回true，设置失败返回false
+	 */
+	public boolean DisableDeviceWithTimeOut(int machineNumber,int second){
+		return zkem.invoke("DisableDeviceWithTimeOut",new Variant(machineNumber),new Variant(second)).getBoolean();
+	}
+	
+	
+	/**
+	 * 关机
+	 * @param machineNumber 机器号
+	 * @return 设置成功返回true
+	 */
+	public boolean PowerOffDevice(int machineNumber){
+		return zkem.invoke("PowerOffDevice",new Variant(machineNumber)).getBoolean();
+	}
+	
+	
+	/**
+	 * 重启机器
+	 * 
+	 * @param machineNumber 机器号
+	 * @return 设置成功返回true
+	 */
+	public boolean RestartDevice(int machineNumber){
+		return zkem.invoke("PowerOffDevice",new Variant(machineNumber)).getBoolean();
+	}
+	
+	
+	
+	
+	
 	
 	
 }

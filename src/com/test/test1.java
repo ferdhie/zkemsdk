@@ -1,6 +1,9 @@
 package com.test;
 import java.util.List;
 import java.util.Map;
+
+import org.junit.Test;
+
 import com.zkem.bw.ZkemSDK;
 
 public class test1 {
@@ -36,4 +39,9 @@ public class test1 {
 	}
 
 
+	@Test
+	public void testSDKVersion(){
+		ZkemSDK zkem=new ZkemSDK();
+		System.out.println(zkem.GetSDKVersion());
+	}
 }
