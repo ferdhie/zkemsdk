@@ -1868,6 +1868,62 @@ public class ZkemSDK {
 	
 	
 	
+	/*****************5.5.2连机登记相关操作*******************/
+	
+	
+	/**
+	 * 登记用户，让机器进入登记用户状态，等待用户按指纹
+	 * 注：使用该函数后，用户按三次指纹完成登记后，可能会出现按指纹不反应的情况，此时可以用StartIdenfity使机器进入等待状态
+	 * 
+	 * @param userID 需要登记的用户ID
+	 * @param fingerID 需要登记的用户指纹索引号，范围为0-9
+	 * @param flag 标识指纹模板是否有效或者为胁迫指纹，0表示指纹模板无效，1表示指纹模板有效，3表示为胁迫指纹
+	 * 
+	 * @return 设置成功返回true ，设置失败返回fasle
+	 */
+	public boolean StartEnrollEx(String userID,int fingerID,int flag){
+		return zkem.invoke("StartEnrollEx",new Variant(userID),
+					new Variant(fingerID),new Variant(flag)).getBoolean();
+	}
+	
+	
+	/**
+	 * 开始1:1比对
+	 * @param userID 用户ID
+	 * @param fingerID 指纹索引，范围为0-9
+	 * @return 验证成功返回true，验证失败返回false
+	 */
+	public boolean StartVerify(int userID,int fingerID){
+		return zkem.invoke("StartVerify",new Variant(userID),new Variant(fingerID)).getBoolean();
+	}
+	
+	
+	/**
+	 * 开始1：N比对，使机器进入1:N验证状态
+	 * 
+	 * @return 验证成功返回true，验证失败返回false
+	 */
+	public boolean StartIdentify(){
+		return zkem.invoke("StartIdentify").getBoolean();
+	}
+	
+	
+	/**
+	 * 取消机器当前的指纹登记状态
+	 * 
+	 * @return 取消成功返回true，取消失败返回false
+	 */
+	public boolean CancelOperation(){
+		return zkem.invoke("CancelOperation").getBoolean();
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	
