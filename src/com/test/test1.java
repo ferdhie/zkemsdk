@@ -4,12 +4,12 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.zkem.bw.ZkemSDK;
+import com.zkem.tft.ZkemSDK;
 
 public class test1 {
 
 	/**
-	 * 测试zkemsdk包是否可用
+	 * 测试zkemsdk包
 	 * @param args
 	 */
 	public static void main(String[] args) {

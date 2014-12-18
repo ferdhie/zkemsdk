@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="javadoc">
+    <target name="javadoc">
+        <javadoc access="public" additionalparam="-encoding utf-8 -charset utf-8 " author="true" classpath="D:\Program Files\eclipse\plugins\org.hamcrest.core_1.1.0.v20090501071000.jar;D:\Program Files\eclipse\plugins\org.junit_4.8.2.v4_8_2_v20110321-1705\junit.jar;lib/jacob.jar" destdir="doc" doctitle="爱信诺--中控考勤接口" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" packagenames="com.charset,com.zkem.tft,com.test" source="1.6" sourcepath="src" splitindex="true" use="true" version="true"/>
+    </target>
+</project>

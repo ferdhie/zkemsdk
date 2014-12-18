@@ -12,8 +12,8 @@ public class CharsetUtils {
 	/**
 	 * 转换字符集
 	 * @param str 需要转换的字符串
-	 * @param charsetName 字符集名称
-	 * @return
+	 * @param charsetName 需要转换成的字符集名称，例如UTF-8,GBK等
+	 * @return 转换成返回该转换后的字符串
 	 */
 	public static String Convert(String str,String charsetName){
 		byte[] byteStr;

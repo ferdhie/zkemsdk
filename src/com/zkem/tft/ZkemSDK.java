@@ -1,4 +1,4 @@
-package com.zkem.bw;
+package com.zkem.tft;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +10,7 @@ import com.jacob.activeX.ActiveXComponent;
 import com.jacob.com.Variant;
 
 /**
- * 中控考勤B&W系列SDK
+ * 中控考勤TFT系列SDK
  * @author 陈捷
  *
  */
@@ -61,7 +61,7 @@ public class ZkemSDK {
 	 * USB连接考勤机
 	 * 函数原型:VARIANT_BOOL Connect_USB([in] long MachineNumber)
 	 * 
-	 * @param inMachineNumber 机器号(输入参数)
+	 * @param machineNumber 机器号(输入参数)
 	 * @return 连接成功返回true,连接失败返回false
 	 */
 	public boolean Connect_USB(int machineNumber){
@@ -470,7 +470,7 @@ public class ZkemSDK {
 	 * 函数原型:VARIANT_BOOL ReadAllUserID([in]long dwMachineNumber)
 	 * 
 	 * @param machineNumber 机器号
-	 * @return
+	 * @return 缓存成功返回true，缓存失败返回false
 	 */
 	public boolean ReadAllUserID(int machineNumber){
 		return zkem.invoke("ReadAllUserID",new Variant(machineNumber)).getBoolean();
@@ -650,9 +650,9 @@ public class ZkemSDK {
 	 * Privilege:用户权限,3管理员，0普通用户
 	 * Enabled:用户启用标志，1为启用，0为禁用
 	 * 
-	 * @param machineNumebr 机器号
+	 * @param machineNumber 机器号
 	 * @param enrollNumber 用户号 
-	 * @return
+	 * @return 返回Map<String,Object>的用户信息
 	 */
 	public Map<String,Object> SSR_GetUserInfo(int machineNumber,String enrollNumber){
 		Variant name=new Variant("",true);
@@ -945,7 +945,7 @@ public class ZkemSDK {
 	 * 以字符串形式上传用户普通指纹模板或者胁迫指纹模板，和SetUserTmpEx不同的仅是指纹模板格式不同而已
 	 * 
 	 * @param machineNumber 机器号
-	 * @param erollNumber 用户号
+	 * @param enrollNumber 用户号
 	 * @param fingerIndex 指纹索引号一般为0-9
 	 * @param flag 标识指纹模板是否有效或为胁迫指纹，0表示指纹模板无效，1表示指纹模板有效，3表示为胁迫指纹
 	 * @param tmpData 指纹模板数据
@@ -1093,7 +1093,7 @@ public class ZkemSDK {
 	 * @param machineNumber 机器号
 	 * @param holidayID 节假日编号
 	 * @param beginMonth 节假日开始时间(月)
-	 * @param beginDay节假日开始时间(日)
+	 * @param beginDay 节假日开始时间(日)
 	 * @param endMonth 节假日结束时间(月)
 	 * @param endDay 节假日结束时间(日)
 	 * @param timeZoneID 节假日使用的时间段编号
@@ -1673,7 +1673,7 @@ public class ZkemSDK {
 	 * 设置机器通讯密码，该函数设置机器通讯密码，该通讯密码会保存在机器内
 	 * 
 	 * @param machineNumber 机器号
-	 * @param commoKey 通讯密码
+	 * @param commKey 通讯密码
 	 * @return 设置成功返回true，设置失败返回false
 	 */
 	public boolean SetDeviceCommPwd(int machineNumber,int commKey){
@@ -1788,7 +1788,7 @@ public class ZkemSDK {
 	 * @param machineNumber 机器号
 	 * @param option 参数名称
 	 * @param value 参数的值
-	 * @return
+	 * @return 设置成功返回true，设置失败返回false
 	 */
 	public boolean SetSysOption(int machineNumber,String option,String value){
 		return zkem.invoke("SetSysOption",new Variant(machineNumber),
@@ -1919,13 +1919,117 @@ public class ZkemSDK {
 	
 	
 	
+	/**********************5.5.3卡操作相关---飘过....*************************/
 	
 	
 	
 	
+	/**********************5.5.4其他*************************/
 	
 	
+	/**
+	 * 获取最后一次错误信息
+	 * 
+	 * @return 错误返回码:-100不支持或数据不存在，-10传输的数据长度不对，-5数据已经存在，-4空间不足
+	 * -3错误的大小，-2文件读写错误，-1SDK未初始化，0找不到数据或数据重复，1操作正确，4参数错误，101分配缓冲区错误
+	 */
+	public Integer GetLastError(){
+		Variant errorCode=new Variant(0,true);
+		boolean status=zkem.invoke("GetLastError",errorCode).getBoolean();
+		if(status==false){
+			return null;
+		}
+		
+		return errorCode.getIntRef();
+	}
 	
 	
+	/**
+	 * 捕获当前指纹头的指纹图像
+	 * @param fullImage 是否获取整个图像，true为整个图像，false只是指纹部分
+	 * @param width 指定捕获的图像的宽度
+	 * @param height 指定捕获的图像的高度
+	 * @param image 该参数接收指定的二进制格式的指纹图像
+	 * @param imageFile 该参数指定捕获的指纹图像的保存名(需包含路径)
+	 * @return 设置成功返回true，设置失败返回false
+	 */
+	public boolean CaptureImage(boolean fullImage,int width,int height,byte image,String imageFile){
+		return zkem.invoke("CaptureImage",
+				new Variant(fullImage),
+				new Variant(width),
+				new Variant(height),
+				new Variant(image),
+				new Variant(imageFile)).getBoolean();
+	}
+	
+	
+	/**
+	 * 升级固件
+	 * @param firmwareFile 需要升级的固件文件名(需包含路径)
+	 * @return 设置成功返回true，设置失败返回false
+	 */
+	public boolean UpdateFirmware(String firmwareFile){
+		return zkem.invoke("UpdateFirmware",new Variant(firmwareFile)).getBoolean();
+	}
+	
+	
+	/**
+	 * 准备以批处理模式上传数据，如在上传用户模板，用户信息等数据前使用该函数，则在上传时SDK将临时地将这些
+	 * 数据都存储在缓冲区，然后再执行BatchUpdate将临时数据一起传进机器
+	 * @param machineNumber 机器号
+	 * @param upateFlag 存在指纹覆盖标志，即上传用户指纹模板时，如该用户指纹所有已经存在，是否
+	 * 覆盖致歉的指纹模板，1为强制覆盖，0为不覆盖
+	 * 
+	 * @return 缓存成返回true，失败返回false
+	 */
+	public boolean BeginBatchUpdate(int machineNumber,int upateFlag){
+		return zkem.invoke("BeginBatchUpdate",
+				new Variant(machineNumber),new Variant(upateFlag)).getBoolean();
+	}
+	
+	
+	/**
+	 * 开始批量上传数据，一般在使用函数BeginBatchUpdate后再上传完相关数据才使用该函数
+	 * 
+	 * @param machineNumber 机器号
+	 * @return 上传成返回true，上传失败返回false
+	 */
+	public boolean BatchUpdate(int machineNumber){
+		return zkem.invoke("BatchUpdate",new Variant(machineNumber)).getBoolean();
+	}
+	
+	
+	/**
+	 * 取消批量上传数据模式，一般在使用了BeginBatchUpdate后，使用BatchUpdate之前可以使用
+	 * 该函数，该函数释放批处理上传准备的缓冲区
+	 * 
+	 * @param machineNumber 机器号
+	 * @return 取消成功返回true，取消失败返回false
+	 * 
+	 */
+	public boolean CancelBatchUpdate(int machineNumber){
+		return zkem.invoke("CancelBatchUpdate",new Variant(machineNumber)).getBoolean();
+	}
+	
+	
+	/**
+	 * 播放指定的连续号语音，具体序号视机器而定，用户可在机器内声音测试查看到序号，一般为0-11
+	 * @param position 开始语音序号
+	 * @param length 结束语音序号
+	 * @return 播放成功返回true，播放失败返回false
+	 */
+	public boolean PlayVoice(int position,int length){
+		return zkem.invoke("PlayVoice",new Variant(position),new Variant(length)).getBoolean();
+	}
+	
+	
+	/**
+	 * 播放指定序号语音，具体序号视机器而定，用户可在机器内声音测试查看到序号，一般为0-11
+	 * @param index 需要播放的语音序号
+	 * @return 播放成功返回true，播放失败返回false
+	 */
+	public boolean PlayVoiceByIndex(int index){
+		return zkem.invoke("PlayVoice",new Variant(index)).getBoolean();
+	}
 	
 }
