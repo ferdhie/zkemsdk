@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import com.charset.CharsetUtils;
 import com.jacob.activeX.ActiveXComponent;
+import com.jacob.com.Dispatch;
+import com.jacob.com.DispatchEvents;
 import com.jacob.com.Variant;
 
 /**
@@ -16,11 +19,12 @@ import com.jacob.com.Variant;
 public class ZkemSDK {
 	
 	//初始化中控插件
-	private static ActiveXComponent zkem=null;
+	public static ActiveXComponent zkem=null;
+	public static String componetName="zkemkeeper.ZKEM";
 	
 	static{
 		try{
-			zkem=new ActiveXComponent("zkemkeeper.ZKEM");
+			zkem=new ActiveXComponent(componetName);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -64,6 +68,9 @@ public class ZkemSDK {
 	 * @return 连接成功返回true,连接失败返回false
 	 */
 	public boolean Connect_USB(int machineNumber){
+		ZkemEvent zkemEvent=new ZkemEvent();
+		Object zkemObject=zkem.getObject();
+		DispatchEvents dispatchEvents=new DispatchEvents((Dispatch) zkemObject,zkemEvent,componetName);
 		return zkem.invoke("Connect_USB",new Variant(machineNumber)).getBoolean();
 	}
 	
@@ -608,13 +615,13 @@ public class ZkemSDK {
 			
 			if(name.getStringRef().getBytes().length == 9 || name.getStringRef().getBytes().length == 8)
 			{
-				strName = CharsetUtils.Convert(name.getStringRef(), "UTF-8").substring(0,3);
+				strName = name.getStringRef().substring(0,3);
 			}else if(name.getStringRef().getBytes().length == 7 || name.getStringRef().getBytes().length == 6)
 			{
-				strName = CharsetUtils.Convert(name.getStringRef(), "UTF-8").substring(0,2);
+				strName = name.getStringRef().substring(0,2);
 			}else if(name.getStringRef().getBytes().length == 11 || name.getStringRef().getBytes().length == 10)
 			{
-				strName = CharsetUtils.Convert(name.getStringRef(), "UTF-8").substring(0,4);
+				strName = name.getStringRef().substring(0,4);
 			}
 			
 //			

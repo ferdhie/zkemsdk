@@ -4,6 +4,9 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import com.jacob.com.Dispatch;
+import com.jacob.com.DispatchEvents;
+import com.zkem.tft.ZkemEvent;
 import com.zkem.tft.ZkemSDK;
 
 public class test1 {
@@ -16,6 +19,10 @@ public class test1 {
 		int machineNumber=1;
 		ZkemSDK zkemsdk=new ZkemSDK();
 //		List<Map<String,Object>> listUser=zkemsdk.GetAllUserInfo(machineNumber);
+		
+		
+		
+		
 		boolean status=zkemsdk.Connect_USB(machineNumber);
 		if(status==false){
 			System.out.println("连接USB失败");

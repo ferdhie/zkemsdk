@@ -9,11 +9,6 @@ import com.jacob.com.Variant;
  *
  */
 public class ZkemEvent {
-	private Dispatch dispatch;
-	
-	public ZkemEvent(Dispatch dispatch){
-		this.dispatch=dispatch;
-	}
 	
 	/**
 	 * 当成功连接机器时触发该事件
